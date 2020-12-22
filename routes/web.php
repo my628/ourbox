@@ -18,5 +18,15 @@ Route::get('/', function () {
 });
 
 Auth::routes();
+Route::get('/blog', 'BlogController@index')->name('blog.index');
+Route::get('/blog/posts/{slug}', 'BlogController@show')->name('blog.show');
+
 
 Route::get('/home', 'HomeController@index')->name('home');
+Route::resource('/home/permission', 'PermissionController');
+Route::resource('/home/post', 'PostController');
+Route::get('/home/file', 'UploadController@index');
+Route::post('/home/file', 'UploadController@store');
+Route::get('/home/category', 'CategoryController@index');
+Route::post('/home/category', 'CategoryController@store');
+Route::get('/home/tag', 'TagController@index');

@@ -1,0 +1,1 @@
+<?php /**PATH /home/vagrant/code/ourbox/resources/views/home/category/modal.blade.php ENDPATH**/ ?>
