@@ -1291,3 +1291,139 @@ rqt是ROS2的GUI工具。
 - ## 下一步
 
     回到ROS2通信方法，在下一个教程中，你将学习actions。
+    
+    
+
+# 理解ROS2行动
+
+
+
+**目标：** ROS 2 中的内省操作。
+
+**教程级别：**初学者
+
+**时间：** 15 分钟
+
+**内容**
+
+
+
+- ## 背景
+
+    动作是 ROS 2 中的一种通信类型，用于长时间运行的任务。
+    它们由三部分组成：目标、反馈和结果。
+
+    操作建立在主题和服务上。
+    它们的功能类似于服务，但可以取消操作。
+    它们还提供稳定的反馈，而不是返回单一响应的服务。
+
+    动作使用客户端-服务器模型，类似于发布者-订阅者模型（在主题教程 <ROS2Topics> 中描述）。
+    “动作客户端”节点向“动作服务器”节点发送目标，该节点确认目标并返回反馈流和结果。
+
+
+
+- ## 先决条件
+
+    本教程基于之前的教程中介绍的概念，例如 :ref:`nodes <ROS2Nodes>` 和 :ref:`topics <ROS2Topics>`。
+
+    本教程使用 :ref:`turtlesim 包 <Turtlesim>`。
+
+    与往常一样，不要忘记在您打开的每个新终端 <ConfigROS2> 中使用 ROS 2。
+
+- ## 任务
+
+    1. ### 设置
+
+    启动两个turtlesim节点，``/turtlesim`` 和``/teleop_turtle``。
+
+    打开一个新终端并运行：
+
+    ```bash
+    ros2 run turtlesim turtlesim_node
+    ```
+    
+    打开另一个终端并运行：
+
+    ```bash
+    ros2 run turtlesim turtle_teleop_key
+    ```
+
+    2. ### 使用动作
+
+    当您启动```/teleop_turtle```节点时，您将在终端中看到以下消息：
+
+    ```bash
+    Use arrow keys to move the turtle.
+    Use G|B|V|C|D|E|R|T keys to rotate to absolute orientations. 'F' to cancel a rotation.
+    ```
+    
+    让我们关注第二行，它对应于一个动作。
+    （第一条指令对应于“cmd_vel”主题，之前在 :ref:`topics 教程 <ROS2Topics>` 中讨论过。）
+
+    请注意，字母键“G|B|V|C|D|E|R|T”在美国 QWERTY 键盘上的“F”键周围形成一个“框”（如果您不使用 QWERTY键盘，请参阅`此链接 <https://en.wikipedia.org/wiki/QWERTY#/media/File:KB_United_States.svg>`__ 以继续操作）。
+    F 周围的每个键的位置对应于turtlesim中的方向。
+    例如，“E”会将海龟的方向旋转到左上角。
+
+    注意 ``/turtlesim`` 节点运行的终端。
+    每次按下这些键之一时，都会向作为 ``/turtlesim`` 节点一部分的动作服务器发送一个目标。
+    目标是旋转海龟以面向特定方向。
+    乌龟完成旋转后，应显示一条中继目标结果的消息：
+
+    .. 代码块::控制台
+
+        [INFO] [turtlesim]：旋转目标成功完成
+
+    ``F`` 键将在执行过程中取消目标。
+
+    尝试按“C”键，然后在海龟完成旋转之前按“F”键。
+    在运行 ``/turtlesim`` 节点的终端中，您将看到以下消息：
+
+    .. 代码块::控制台
+
+      [INFO] [turtlesim]：轮换目标取消
+
+    不仅客户端（您在 Teleop 中的输入）可以阻止目标，服务器端（``/turtlesim`` 节点）也可以。
+    当服务器端选择停止处理一个目标时，称为“中止”该目标。
+
+    尝试按“D”键，然后在第一次旋转完成之前按“G”键。
+    在运行 ``/turtlesim`` 节点的终端中，您将看到以下消息：
+
+    .. 代码块::控制台
+
+      [WARN] [turtlesim]：在前一个目标完成之前收到的轮换目标。中止之前的目标
+
+    这个动作服务器选择中止第一个目标，因为它有一个新的目标。
+    它可以选择其他东西，例如拒绝新目标或在第一个目标完成后执行第二个目标。
+    不要假设每个动作服务器在获得新目标时都会选择中止当前目标。
+
+    3. ### ros2 节点信息
+    ^^^^^^^^^^^^^^^^^
+
+    要查看 ``/turtlesim`` 节点的操作，请打开一个新终端并运行以下命令：
+
+    .. 代码块::控制台
+
+        ros2 节点信息 /turtlesim
+
+    这将返回 /turtlesim 的订阅者、发布者、服务、动作服​​务器和动作客户端的列表：
+
+    .. 代码块::控制台
+
+      /海龟
+        订阅者：
+          /parameter_events: rcl_interfaces/msg/ParameterEvent
+          /turtle1/cmd_vel: geometry_msgs/msg/Twist
+        出版商：
+          /parameter_events: rcl_interfaces/msg/ParameterEvent
+          /rosout: rcl_interfaces/msg/日志
+          /turtle1/color_sensor：turtlesim/msg/颜色
+          /turtle1/pose：turtlesim/msg/姿势
+        服务服务器：
+          /clear: std_srvs/srv/Empty
+          /kill：turtlesim/srv/Kill
+          /重置：std_srvs/srv/Empty
+          /spawn：turtlesim/srv/Spawn
+          /turtle1/set_pen：turtlesim/srv/SetPen
+          /turtle1/teleport_absolute：turtlesim/srv/TeleportAbsolute
+          /turtle1/teleport_relative：turtlesim/srv/TeleportRelative
+          /turtlesim/describe_parameter
